@@ -1,60 +1,27 @@
-import argparse
-from analyzer import PasswordAnalyzer
-
+from analyzer import analyze_password, improvement_suggestions
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Password Strength Analyzer - CLI Tool"
-    )
+    print("=== Password Strength Analyzer (CLI) ===")
+    password = input("Enter password: ")
 
-    parser.add_argument(
-        "-p", "--password",
-        help="Password string to analyze"
-    )
+    score = analyze_password(password)
+    print(f"\nPassword Strength Score: {score}%")
 
-    parser.add_argument(
-        "-f", "--file",
-        help="Path to file containing passwords (one per line)"
-    )
-
-    args = parser.parse_args()
-
-    analyzer = PasswordAnalyzer(dictionary_path="../data/dictionary.txt")
-
-    if args.password:
-        result = analyzer.score_password(args.password)
-        display_result(args.password, result)
-
-    elif args.file:
-        try:
-            with open(args.file, "r", encoding="utf-8") as f:
-                for line in f:
-                    pwd = line.strip()
-                    if pwd:
-                        result = analyzer.score_password(pwd)
-                        display_result(pwd, result)
-        except FileNotFoundError:
-            print("Error: File not found.")
-
+    if score < 40:
+        print("Strength Level: Weak")
+    elif score < 70:
+        print("Strength Level: Medium")
     else:
-        print("No input provided. Use --password or --file.")
+        print("Strength Level: Strong")
 
+    suggestions = improvement_suggestions(password)
 
-def display_result(password, result):
-    print("=" * 40)
-    print(f"Password: {password}")
-    print(f"Score: {result['score']}")
-    print(f"Strength: {result['strength']}")
-
-    if result["details"]["patterns"]:
-        print("Warnings:")
-        for p in result["details"]["patterns"]:
-            print(f" - {p}")
-
-    if result["details"]["dictionary_word"]:
-        print(" - Dictionary word detected")
-
-    print("=" * 40)
+    if suggestions:
+        print("\nImprovement Suggestions:")
+        for s in suggestions:
+            print(f"- {s}")
+    else:
+        print("\nStrong password. No improvements needed.")
 
 
 if __name__ == "__main__":
